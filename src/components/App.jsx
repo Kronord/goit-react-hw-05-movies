@@ -1,22 +1,42 @@
 import { Route, Routes, NavLink } from "react-router-dom";
 import HomePage from './HomePage/HomePage';
-// import Cast from './Cast/Cast';
+import Cast from './Cast/Cast';
 import MoviesDetailsPage from './MoviesDetailsPage/MoviesDetailsPage';
 import MoviesPage from './MoviesPage/MoviesPage';
-// import Reviews from './Reviews/Reviews';
+import Reviews from './Reviews/Reviews';
+import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding-top: 10px;
+`;
+
+const StyledNavLink = styled(NavLink)`
+  text-decoration: none;
+  font-size: 25px;
+  margin-left: 60px;
+
+  &:first-child {
+    margin-left: 20px;
+  }
+`;
 
 export const App = () => {
   return (
     <>
-      <NavLink to="/">Home</NavLink>
-      <NavLink to="/movies">Movies</NavLink>
+      <Wrapper>
+      <StyledNavLink to="/">Home</StyledNavLink>
+      <StyledNavLink to="/movies">Movies</StyledNavLink>
+      </Wrapper>
 
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/movies" element={<MoviesPage />} />
         <Route path="/movies/:movieId" element={<MoviesDetailsPage />}>
-          {/* <Route path="/movies/:movieId/cast" element={<Cast />} />
-          <Route path="/movies/:movieId/reviews" element={<Reviews />} /> */}
+          <Route path="cast" element={<Cast />} />
+          <Route path="reviews" element={<Reviews />} />
         </Route>
         <Route path="*" element={<HomePage />} />
       </Routes>
