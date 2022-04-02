@@ -19,6 +19,13 @@ const Wrapper = styled(Container)`
   flex-direction: column;
 `;
 
+const InfoLinkBox = styled(Wrapper)`
+  margin: 20px;
+  padding-left: 15px;
+  border: 3px solid orange;
+  border-radius: 5px;
+`; 
+
 const DiscrBox = styled(Wrapper)`
   width: 600px;
   margin-left: 50px;
@@ -27,6 +34,21 @@ const DiscrBox = styled(Wrapper)`
 const Title = styled.h2`
   display: block;
   margin-left: 20px;
+`;
+
+const Subtitle = styled.h3`
+  color: orange;
+`;
+
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: #000;
+  font-size: 18px;
+  margin-bottom: 10px;
+
+  &:hover {
+    color: orange;
+  }
 `;
 
 export default function MovieDetails() {
@@ -83,17 +105,17 @@ export default function MovieDetails() {
           <DiscrBox>
             <p>Popularity: {data.popularity}</p>
             <p>Tag Line: {data.tagline}</p>
-            <h3>Overview</h3>
+            <Subtitle>Overview</Subtitle>
             <p>{data.overview}</p>
-            <h3>Genres</h3>
+            <Subtitle>Genres</Subtitle>
             <p>{data.genres.map(el => el.name).join(', ')}</p>
           </DiscrBox>
         </Container>
-        <Wrapper>
-          <h3>Additional Information</h3>
-          <Link to={`/movies/${movieId}/cast`}>Cast</Link>
-          <Link to={`/movies/${movieId}/reviews`}>Reviews</Link>
-        </Wrapper>
+        <InfoLinkBox>
+          <Subtitle>Additional Information</Subtitle>
+          <StyledLink to={`/movies/${movieId}/cast`}>Cast</StyledLink>
+          <StyledLink to={`/movies/${movieId}/reviews`}>Reviews</StyledLink>
+        </InfoLinkBox>
         <Outlet />
       </>
     );

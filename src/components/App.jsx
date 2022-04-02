@@ -8,9 +8,10 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   display: flex;
+  margin-top: 10px;
   align-items: center;
   height: 50px;
-  padding-top: 10px;
+  border-bottom: 3px solid orange;
 `;
 
 const StyledNavLink = styled(NavLink)`
