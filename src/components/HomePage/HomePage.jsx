@@ -1,42 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getTrendingFilms } from 'components/services/FilmsApi';
 import { css } from '@emotion/react';
-import { Link } from 'react-router-dom';
 import { PacmanLoader } from 'react-spinners';
-import styled from 'styled-components';
-
-const Title = styled.h1`
-  margin-left: 20px;
-  color: orange;
-`;
-
-const Item = styled.li`
-  margin-bottom: 10px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &:hover {
-    color: orange;
-  }
-`;
-
-const List = styled.ul`
-  list-style: none;
-`;
-
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  color: #000;
-  font-size: 18px;
-
-  &:hover {
-    color: orange;
-  }
-`;  
-
-
+import { Title, Item, List, StyledLink } from './HomePage.style';
 
 export default function HomePage() {
   const [data, setData] = useState(null);
@@ -48,37 +14,42 @@ export default function HomePage() {
   `;
 
   useEffect(() => {
-      setStatus('pending')
-      getTrendingFilms().then(res => {
-        setData(res.results);
-        setStatus('resolved');
-      });
-    }, []);
+    setStatus('pending');
+    getTrendingFilms().then(res => {
+      setData(res.results);
+      setStatus('resolved');
+    }).catch(error => setStatus('rejected'));
+  }, []);
 
-  if (status === 'idle') { 
-    return <h1>Welcome!</h1>
-  };
+  if (status === 'idle') {
+    return <Title>Trending today</Title>;
+  }
 
-  if (status === 'resolved') { 
+  if (status === 'resolved') {
     return (
       <>
         <Title>Trending today</Title>
         <List>
           {data &&
-            data.map(el => {
+            data.map(({id, name, title}) => {
               return (
-                <Item key={el.id}>
-                  <StyledLink to={`/movies/${el.id}`}>{el.name ?? el.title}</StyledLink>
+                <Item key={id}>
+                  <StyledLink to={`/movies/${id}`}>
+                    {name ?? title}
+                  </StyledLink>
                 </Item>
               );
             })}
         </List>
       </>
     );
-  };
+  }
 
-  if (status === 'pending') { 
+  if (status === 'pending') {
     return <PacmanLoader color="#F5A623" css={override} size="50px" />;
+  }
+
+  if (status === 'rejected') { 
+    return <h1>Sorry, we don`t have any information</h1>
   };
-    
 }

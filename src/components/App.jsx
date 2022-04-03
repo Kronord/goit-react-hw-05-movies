@@ -1,46 +1,44 @@
-import { Route, Routes, NavLink } from "react-router-dom";
-import HomePage from './HomePage/HomePage';
-import Cast from './Cast/Cast';
-import MoviesDetailsPage from './MoviesDetailsPage/MoviesDetailsPage';
-import MoviesPage from './MoviesPage/MoviesPage';
-import Reviews from './Reviews/Reviews';
-import styled from 'styled-components';
+import { Route, Routes } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Wrapper, StyledNavLink } from './App.style';
 
-const Wrapper = styled.div`
-  display: flex;
-  margin-top: 10px;
-  align-items: center;
-  height: 50px;
-  border-bottom: 3px solid orange;
-`;
-
-const StyledNavLink = styled(NavLink)`
-  text-decoration: none;
-  font-size: 25px;
-  margin-left: 60px;
-
-  &:first-child {
-    margin-left: 20px;
-  }
-`;
+const HomePage = lazy(() =>
+  import('./HomePage/HomePage' /* webpackChunkName: 'HomePage' */)
+);
+const Cast = lazy(() => import('./Cast/Cast' /* webpackChunkName: 'Cast' */));
+const MoviesDetailsPage = lazy(() =>
+  import(
+    './MoviesDetailsPage/MoviesDetailsPage' /* webpackChunkName: 'MovieDetails' */
+  )
+);
+const MoviesPage = lazy(() =>
+  import('./MoviesPage/MoviesPage' /* webpackChunkName: 'MoviePage' */)
+);
+const Reviews = lazy(() =>
+  import('./Reviews/Reviews' /* webpackChunkName: 'Reviews' */)
+);
 
 export const App = () => {
   return (
     <>
       <Wrapper>
-      <StyledNavLink to="/">Home</StyledNavLink>
-      <StyledNavLink to="/movies">Movies</StyledNavLink>
+        <StyledNavLink to="/" end>
+          Home
+        </StyledNavLink>
+        <StyledNavLink to="/movies">Movies</StyledNavLink>
       </Wrapper>
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/movies" element={<MoviesPage />} />
-        <Route path="/movies/:movieId" element={<MoviesDetailsPage />}>
-          <Route path="cast" element={<Cast />} />
-          <Route path="reviews" element={<Reviews />} />
-        </Route>
-        <Route path="*" element={<HomePage />} />
-      </Routes>
+      <Suspense fallback={<h1>Download</h1>}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/movies" element={<MoviesPage />} />
+          <Route path="/movies/:movieId" element={<MoviesDetailsPage />}>
+            <Route path="cast" element={<Cast />} />
+            <Route path="reviews" element={<Reviews />} />
+          </Route>
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </Suspense>
     </>
   );
 };

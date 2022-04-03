@@ -1,68 +1,31 @@
-import { useParams, Link, Outlet } from 'react-router-dom';
+import { useParams, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getMovieDetails } from 'components/services/FilmsApi';
 import { css } from '@emotion/react';
 import { PacmanLoader } from 'react-spinners';
-import styled from 'styled-components';
-
-const Container = styled.div`
-  display: flex;
-`;
-
-const StyledImage = styled.img`
-  display: block;
-  width: 300px;
-  margin-left: 20px;
-`;
-
-const Wrapper = styled(Container)`
-  flex-direction: column;
-`;
-
-const InfoLinkBox = styled(Wrapper)`
-  margin: 20px;
-  padding-left: 15px;
-  border: 3px solid orange;
-  border-radius: 5px;
-`; 
-
-const DiscrBox = styled(Wrapper)`
-  width: 600px;
-  margin-left: 50px;
-`;
-
-const Title = styled.h2`
-  display: block;
-  margin-left: 20px;
-`;
-
-const Subtitle = styled.h3`
-  color: orange;
-`;
-
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  color: #000;
-  font-size: 18px;
-  margin-bottom: 10px;
-
-  &:hover {
-    color: orange;
-  }
-`;
+import {
+  Container,
+  StyledImage,
+  Wrapper,
+  InfoLinkBox,
+  DiscrBox,
+  Title,
+  Subtitle,
+  StyledLink,
+  Button,
+} from './MoviesDetails.style';
 
 export default function MovieDetails() {
   const { movieId } = useParams();
-  // const match = useMatch('/movies');
   const [data, setData] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [status, setStatus] = useState('idle');
 
   const override = css`
     display: block;
     margin: 200px auto;
   `;
-
-  // console.log(match);
 
   useEffect(() => {
     setStatus('pending');
@@ -73,6 +36,13 @@ export default function MovieDetails() {
       })
       .catch(error => setStatus('rejected'));
   }, [movieId]);
+
+  const onGoBack = () => {
+    if (location.state !== null) {
+      return navigate(-1);
+    }
+    navigate(`/`);
+  };
 
   if (status === 'idle') {
     return <h1>Welcome</h1>;
@@ -90,31 +60,39 @@ export default function MovieDetails() {
   }
 
   if (status === 'resolved') {
+    const { title, popularity, release_date, poster_path, tagline, overview, genres } = data;
     return (
       <>
+        <Button type="button" onClick={onGoBack}>
+          Go back
+        </Button>
         <Title>
-          {data.title} &#40;{data.release_date.slice(0, 4)}&#41;
+          {title} &#40;{release_date.slice(0, 4)}&#41;
         </Title>
         <Container>
           <Wrapper>
             <StyledImage
-              src={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
+              src={`https://image.tmdb.org/t/p/w500${poster_path}`}
               alt="poster"
             />
           </Wrapper>
           <DiscrBox>
-            <p>Popularity: {data.popularity}</p>
-            <p>Tag Line: {data.tagline}</p>
+            <p>Popularity: {popularity}</p>
+            <p>Tag Line: {tagline}</p>
             <Subtitle>Overview</Subtitle>
-            <p>{data.overview}</p>
+            <p>{overview}</p>
             <Subtitle>Genres</Subtitle>
-            <p>{data.genres.map(el => el.name).join(', ')}</p>
+            <p>{genres.map(el => el.name).join(', ')}</p>
           </DiscrBox>
         </Container>
         <InfoLinkBox>
           <Subtitle>Additional Information</Subtitle>
-          <StyledLink to={`/movies/${movieId}/cast`}>Cast</StyledLink>
-          <StyledLink to={`/movies/${movieId}/reviews`}>Reviews</StyledLink>
+          <StyledLink to={'cast'} state={{ search: 'label' }}>
+            Cast
+          </StyledLink>
+          <StyledLink to={'reviews'} state={{ search: 'label' }}>
+            Reviews
+          </StyledLink>
         </InfoLinkBox>
         <Outlet />
       </>

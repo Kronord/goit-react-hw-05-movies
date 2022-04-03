@@ -1,81 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { searchFilms } from 'components/services/FilmsApi';
-import { Link } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { PacmanLoader } from 'react-spinners';
-import styled from 'styled-components';
-
-const Item = styled.li`
-  margin-bottom: 10px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &:hover {
-    color: orange;
-  }
-`;
-
-const List = styled.ul`
-  list-style: none;
-`;
-
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  color: #000;
-  font-size: 18px;
-
-  &:hover {
-    color: orange;
-  }
-`;  
-
-const Input = styled.input`
-  display: inline-block;
-  margin: 0 10px 0 20px;
-  width: 200px;
-  font: inherit;
-  border: 2px solid;
-  border-radius: 5px;
-  border-color: orange;
-  font-size: 20px;
-  outline: none;
-  padding-left: 4px;
-  padding-right: 4px;
-`;
-
-const Button = styled.button`
-  width: 70px;
-  height: 29px; 
-  color: #fff;
-  border: 2px solid;
-  border-radius: 5px;
-  border-color: #ff8c00;
-  background-color: #ffa50088;
-  cursor: pointer;
-`;
-
-const Form = styled.form`
-  display: flex;
-  align-items: center;
-  margin-top: 20px;
-`;
+import { Item, List, StyledLink, Input, Button, Form } from './Movies.style';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 export default function MoviesPage() {
   const [data, setData] = useState();
   const [film, setFilm] = useState('');
   const [status, setStatus] = useState('idle');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
 
   const override = css`
     display: block;
     margin: 200px auto;
   `;
 
+  useEffect(() => {
+    if (location.search !== '') {
+      setStatus('pending');
+      searchFilms(searchParams.get('query')).then(res => {
+        setData(res.results);
+        setStatus('resolved');
+      });
+    }
+  }, [location.search, searchParams]);
+
   const handleChange = e => setFilm(e.target.value);
 
   const handleSubmit = e => {
     e.preventDefault();
+    setSearchParams(`query=${film}`);
     setStatus('pending');
     searchFilms(film).then(res => {
       setData(res.results);
@@ -112,10 +68,20 @@ export default function MoviesPage() {
         </Form>
 
         <List>
-          {data.map(el => {
+          {data.map(({id, name, title}) => {
             return (
-              <Item key={el.id}>
-                <StyledLink to={`/movies/${el.id}`}>{el.name ?? el.title}</StyledLink>
+              <Item key={id}>
+                <StyledLink
+                  to={{
+                    pathname: `${id}`,
+                  }}
+                  state={{
+                    from: location,
+                    search: location.search,
+                  }}
+                >
+                  {name ?? title}
+                </StyledLink>
               </Item>
             );
           })}

@@ -3,64 +3,61 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { PacmanLoader } from 'react-spinners';
-import styled from 'styled-components';
+import { List, Subtitle, WarnMessage } from './Reviews.style';
 
-const List = styled.ul`
-    list-style: none;
-    padding: 0;
-    margin: 0 20px;
-`;
+export default function Cast() {
+  const [data, setData] = useState([]);
+  const { movieId } = useParams();
+  const [status, setStatus] = useState('idle');
 
-const Subtitle = styled.h4`
-    color: orange;
-`;
+  const override = css`
+    display: block;
+    margin: 200px auto;
+  `;
 
-export default function Cast() { 
-    const [data, setData] = useState(null);
-    const { movieId } = useParams();
-    const [status, setStatus] = useState('idle');
+  useEffect(() => {
+    setStatus('pending');
+    getMovieReviews(movieId)
+      .then(res => {
+        setData(res.results);
+        console.log(res);
+        data.length > 0 ? setStatus('resolved') : setStatus('rejected');
+      })
+      .catch(error => setStatus('rejected'));
+  }, [data.length, movieId]);
 
-     const override = css`
-       display: block;
-       margin: 200px auto;
-     `;
+  if (status === 'idle') {
+    return <h1>Welcome!</h1>;
+  }
 
-    useEffect(() => {
-        setStatus('pending')
-        getMovieReviews(movieId).then(res => {
-            setData(res.results);
-            setStatus('resolved');
-        })
-    }, [movieId]);
+  if (status === 'pending') {
+    return (
+      <PacmanLoader
+        color="#F5A623"
+        css={override}
+        size="50px"
+        speedMultiplier="4"
+      />
+    );
+  }
 
-    if (status === 'idle') { 
-        return <h1>Welcome!</h1>
-    };
+  if (status === 'resolved') {
+    return (
+      <List>
+        {data &&
+          data.map(({id, author, content}) => {
+            return (
+              <li key={id}>
+                <Subtitle>{author}</Subtitle>
+                <p>{content}</p>
+              </li>
+            );
+          })}
+      </List>
+    );
+  }
 
-    if (status === 'pending') { 
-        return (
-          <PacmanLoader
-            color="#F5A623"
-            css={override}
-            size="50px"
-            speedMultiplier="4"
-          />
-        );
-    };
-
-    if (status === 'resolved') { 
-        return (
-          <List>
-            {data &&
-              data.map(el => {
-                return (
-                  <li key={el.id}>
-                    <Subtitle>{el.author}</Subtitle>
-                    <p>{el.content}</p>
-                  </li>
-                );
-              })}
-          </List>
-        );
-    };    
-};
+  if (status === 'rejected') {
+    return <WarnMessage>We don`t have any reviews for this movie</WarnMessage>;
+  }
+}
