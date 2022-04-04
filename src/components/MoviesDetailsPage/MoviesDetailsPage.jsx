@@ -31,6 +31,7 @@ export default function MovieDetails() {
     setStatus('pending');
     getMovieDetails(movieId)
       .then(res => {
+        console.log(res);
         setData(res);
         setStatus('resolved');
       })
