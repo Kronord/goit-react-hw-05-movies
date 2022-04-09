@@ -1,42 +1,25 @@
-import { useState, useEffect } from 'react';
-import { searchFilms } from 'components/services/FilmsApi';
+import useFetchMoviesPage from 'components/Hooks/useFetchMoviesPage';
+import { useState } from 'react';
 import { css } from '@emotion/react';
 import { PacmanLoader } from 'react-spinners';
 import { Item, List, StyledLink, Input, Button, Form } from './Movies.style';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 export default function MoviesPage() {
-  const [data, setData] = useState();
   const [film, setFilm] = useState('');
-  const [status, setStatus] = useState('idle');
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
+  const { data, status, location } = useFetchMoviesPage(searchParams);
 
   const override = css`
     display: block;
     margin: 200px auto;
   `;
 
-  useEffect(() => {
-    if (location.search !== '') {
-      setStatus('pending');
-      searchFilms(searchParams.get('query')).then(res => {
-        setData(res.results);
-        setStatus('resolved');
-      });
-    }
-  }, [location.search, searchParams]);
-
   const handleChange = e => setFilm(e.target.value);
 
   const handleSubmit = e => {
     e.preventDefault();
-    setSearchParams(`query=${film}`);
-    setStatus('pending');
-    searchFilms(film).then(res => {
-      setData(res.results);
-      setStatus('resolved');
-    });
+    setSearchParams({query: `${film}`});
   };
 
   if (status === 'idle') {
@@ -46,7 +29,7 @@ export default function MoviesPage() {
         <Button type="submit">Search</Button>
       </Form>
     );
-  }
+  };
 
   if (status === 'pending') {
     return (
@@ -57,7 +40,7 @@ export default function MoviesPage() {
         speedMultiplier="4"
       />
     );
-  }
+  };
 
   if (status === 'resolved') {
     return (
@@ -77,7 +60,6 @@ export default function MoviesPage() {
                   }}
                   state={{
                     from: location,
-                    search: location.search,
                   }}
                 >
                   {name ?? title}
@@ -88,5 +70,9 @@ export default function MoviesPage() {
         </List>
       </div>
     );
-  }
+  };
+
+  if (status === 'rejected') {
+    return <h1>Sorry, we don`t found this movie</h1>;
+  };
 }

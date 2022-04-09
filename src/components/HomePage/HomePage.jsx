@@ -1,25 +1,17 @@
-import { useState, useEffect } from 'react';
-import { getTrendingFilms } from 'components/services/FilmsApi';
+import useFetchHomePage from 'components/Hooks/useFetchHomePage';
 import { css } from '@emotion/react';
 import { PacmanLoader } from 'react-spinners';
 import { Title, Item, List, StyledLink } from './HomePage.style';
+import { useLocation } from 'react-router-dom';
 
 export default function HomePage() {
-  const [data, setData] = useState(null);
-  const [status, setStatus] = useState('idle');
+  const { data, status } = useFetchHomePage();
+  const location = useLocation();
 
   const override = css`
     display: block;
     margin: 200px auto;
   `;
-
-  useEffect(() => {
-    setStatus('pending');
-    getTrendingFilms().then(res => {
-      setData(res.results);
-      setStatus('resolved');
-    }).catch(error => setStatus('rejected'));
-  }, []);
 
   if (status === 'idle') {
     return <Title>Trending today</Title>;
@@ -34,7 +26,7 @@ export default function HomePage() {
             data.map(({id, name, title}) => {
               return (
                 <Item key={id}>
-                  <StyledLink to={`/movies/${id}`}>
+                  <StyledLink to={`/movies/${id}`} state={{from: location}}>
                     {name ?? title}
                   </StyledLink>
                 </Item>

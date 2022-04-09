@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
-import { Wrapper, StyledNavLink } from './App.style';
+import { lazy } from 'react';
+import Layout from './Layout/Layout';
 
 const HomePage = lazy(() =>
   import('./HomePage/HomePage' /* webpackChunkName: 'HomePage' */)
@@ -21,24 +21,17 @@ const Reviews = lazy(() =>
 export const App = () => {
   return (
     <>
-      <Wrapper>
-        <StyledNavLink to="/" end>
-          Home
-        </StyledNavLink>
-        <StyledNavLink to="/movies">Movies</StyledNavLink>
-      </Wrapper>
-
-      <Suspense fallback={<h1>Download</h1>}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
           <Route path="/movies" element={<MoviesPage />} />
           <Route path="/movies/:movieId" element={<MoviesDetailsPage />}>
             <Route path="cast" element={<Cast />} />
             <Route path="reviews" element={<Reviews />} />
           </Route>
           <Route path="*" element={<Navigate to={'/'} />} />
-        </Routes>
-      </Suspense>
+        </Route>
+      </Routes>
     </>
   );
 };

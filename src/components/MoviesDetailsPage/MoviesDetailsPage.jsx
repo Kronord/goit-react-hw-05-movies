@@ -1,6 +1,5 @@
-import { useParams, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { getMovieDetails } from 'components/services/FilmsApi';
+import useFetchDetailsMovie from 'components/Hooks/useFetchDetailsMovie';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { PacmanLoader } from 'react-spinners';
 import {
@@ -16,33 +15,20 @@ import {
 } from './MoviesDetails.style';
 
 export default function MovieDetails() {
-  const { movieId } = useParams();
-  const [data, setData] = useState(null);
+  const { data, status } = useFetchDetailsMovie();
   const navigate = useNavigate();
   const location = useLocation();
-  const [status, setStatus] = useState('idle');
 
   const override = css`
     display: block;
     margin: 200px auto;
   `;
 
-  useEffect(() => {
-    setStatus('pending');
-    getMovieDetails(movieId)
-      .then(res => {
-        console.log(res);
-        setData(res);
-        setStatus('resolved');
-      })
-      .catch(error => setStatus('rejected'));
-  }, [movieId]);
-
   const onGoBack = () => {
-    if (location.state !== null) {
-      return navigate(-1);
+    if (location.state === null) {
+      return navigate('/');
     }
-    navigate(`/`);
+    navigate(location?.state?.from ?? '/movies');
   };
 
   if (status === 'idle') {
@@ -61,7 +47,16 @@ export default function MovieDetails() {
   }
 
   if (status === 'resolved') {
-    const { title, popularity, release_date, poster_path, tagline, overview, genres } = data;
+    const {
+      title,
+      popularity,
+      release_date,
+      poster_path,
+      tagline,
+      overview,
+      genres,
+    } = data;
+    
     return (
       <>
         <Button type="button" onClick={onGoBack}>
@@ -88,10 +83,16 @@ export default function MovieDetails() {
         </Container>
         <InfoLinkBox>
           <Subtitle>Additional Information</Subtitle>
-          <StyledLink to={'cast'} state={{ search: 'label' }}>
+          <StyledLink
+            to={'cast'}
+            state={{ from: location.state !== null ? location.state.from : '' }}
+          >
             Cast
           </StyledLink>
-          <StyledLink to={'reviews'} state={{ search: 'label' }}>
+          <StyledLink
+            to={'reviews'}
+            state={{ from: location.state !== null ? location.state.from : '' }}
+          >
             Reviews
           </StyledLink>
         </InfoLinkBox>

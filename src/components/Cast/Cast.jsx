@@ -1,27 +1,15 @@
-import { getMovieCredits } from 'components/services/FilmsApi';
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import useFetchCast from 'components/Hooks/useFetchCast';
 import { css } from '@emotion/react';
 import { PacmanLoader } from 'react-spinners';
 import { List, Item, Photo } from './Cast.Style';
 
 export default function Cast() {
-  const [data, setData] = useState(null);
-  const { movieId } = useParams();
-  const [status, setStatus] = useState('idle');
+  const { data, status } = useFetchCast();
 
   const override = css`
     display: block;
     margin: 200px auto;
   `;
-
-  useEffect(() => {
-    setStatus('pending');
-    getMovieCredits(movieId).then(res => {
-      setData(res.cast);
-      setStatus('resolved');
-    }).catch(error => setStatus('rejected'));
-  }, [movieId]);
 
   if (status === 'idle') {
     return <h1>Welcome</h1>;
